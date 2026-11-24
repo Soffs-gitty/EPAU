@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPAU Triage Dashboard • O&G Hospital Kajang</title>
+  
+  <!-- Tailwind CSS CDN for responsive utility styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Base Font Family */
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Glassmorphic + Neumorphic Core Classes */
+    .neo-flat {
+      background: rgba(255, 255, 255, 0.42);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 8px 8px 24px 0 rgba(31, 38, 135, 0.1), -8px -8px 24px 0 rgba(255, 255, 255, 0.65);
+      border-radius: 1.25rem;
+    }
+    
+    .neo-pressed {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: inset 4px 4px 10px 0 rgba(31, 38, 135, 0.1), inset -4px -4px 10px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .neo-btn {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 4px 4px 12px rgba(31, 38, 135, 0.1), -4px -4px 12px rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+    }
+    
+    .neo-btn:hover {
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 6px 6px 16px rgba(31, 38, 135, 0.15), -6px -6px 16px rgba(255, 255, 255, 0.85);
+    }
+
+    .neo-btn:active {
+      box-shadow: inset 3px 3px 8px rgba(31, 38, 135, 0.15), inset -3px -3px 8px rgba(255, 255, 255, 0.6);
+      transform: translateY(2px);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      background: rgba(30, 27, 75, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* 3D Glass Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.15); 
+      border-radius: 10px;
+      box-shadow: inset 2px 2px 5px rgba(31, 38, 135, 0.1);
+      margin: 10px 0;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.55); 
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 1px 1px 3px rgba(31, 38, 135, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-300 text-gray-800 pb-10">
+
+  <!-- Background O&G Medical Infographics (Non-interactive decorative layer) -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden opacity-[0.15] z-0" aria-hidden="true">
+    <i data-lucide="heart-pulse" class="w-[380px] h-[380px] absolute -top-10 -left-20 text-pink-600 rotate-12"></i>
+    <i data-lucide="baby" class="w-[520px] h-[520px] absolute top-40 -right-24 text-purple-700 -rotate-12"></i>
+    <i data-lucide="stethoscope" class="w-[340px] h-[340px] absolute bottom-10 left-1/4 text-indigo-700 rotate-45"></i>
+    <i data-lucide="activity" class="w-[560px] h-[560px] absolute -bottom-36 right-1/4 text-pink-500 opacity-60"></i>
+    
+    <!-- Abstract Heartbeat Wave SVG -->
+    <svg class="absolute top-[30%] left-0 w-full h-64 text-purple-600 opacity-40" preserveAspectRatio="none" viewBox="0 0 1440 320">
+      <path fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M0,160 L200,160 L250,60 L300,260 L350,160 L500,160 L550,100 L600,220 L650,160 L1440,160" />
+    </svg>
+  </div>
+
+  <!-- Main Foreground Container -->
+  <div class="relative z-10">
+    
+    <!-- Top Header -->
+    <header class="neo-flat mx-4 sm:mx-8 my-6 px-6 py-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="neo-pressed p-2 rounded-xl text-pink-600 inline-flex items-center justify-center">
+            <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+          </span>
+          <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">EPAU Triage Dashboard</h1>
+        </div>
+        <p class="text-sm text-gray-600 font-bold mt-1">Early Pregnancy Assessment Unit • O&amp;G Hospital Kajang</p>
+      </div>
+
+      <!-- Header Controls & Shift Date -->
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-start md:justify-end">
+        <button onclick="openModal('guide-modal')" class="neo-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i> Triage Guide
+        </button>
+
+        <button onclick="openModal('register-modal')" class="neo-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-pink-600 flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4"></i> Register Patient
+        </button>
+
+        <button onclick="resetDemoData()" title="Restore default 10 patients" class="neo-btn px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-600 flex items-center gap-1.5">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Reset Demo</span>
+        </button>
+
+        <div class="text-right hidden lg:block neo-pressed px-5 py-2.5 rounded-xl">
+          <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Shift Overview</p>
+          <p id="shift-date" class="text-sm font-extrabold text-gray-700 mt-0.5"></p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="mx-4 sm:mx-8">
+      
+      <!-- Top Metrics Row (4 Key Counters) -->
+      <section aria-label="Daily Attendance Metrics" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Attendees -->
+        <div class="neo-flat p-5 flex items-center gap-5">
+          <div class="neo-pressed p-4 rounded-full flex items-center justify-center text-blue-500">
+            <i data-lucide="users" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 font-bold mb-1">Total Attendees</p>
+            <h3 id="metric-total" class="text-3xl font-extrabold text-gray-700">0</h3>
+          </div>
+        </div>
+
+        <!-- Total Not Seen -->
+        <div class="neo-flat p-5 flex items-center gap-5">
+          <div class="neo-pressed p-4 rounded-full flex items-center justify-center text-red-500">
+            <i data-lucide="user-x" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 font-bold mb-1">Total Not Seen</p>
+            <h3 id="metric-not-seen" class="text-3xl font-extrabold text-gray-700">0</h3>
+          </div>
+        </div>
+
+        <!-- Total Seen (EPAU) -->
+        <div class="neo-flat p-5 flex items-center gap-5">
+          <div class="neo-pressed p-4 rounded-full flex items-center justify-center text-green-500">
+            <i data-lucide="user-check" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 font-bold mb-1">Total Seen (EPAU)</p>
+            <h3 id="metric-seen" class="text-3xl font-extrabold text-gray-700">0</h3>
+          </div>
+        </div>
+
+        <!-- Admitted / Ward -->
+        <div class="neo-flat p-5 flex items-center gap-5">
+          <div class="neo-pressed p-4 rounded-full flex items-center justify-center text-purple-500">
+            <i data-lucide="bed-double" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 font-bold mb-1">Admitted / Ward</p>
+            <h3 id="metric-ward" class="text-3xl font-extrabold text-gray-700">0</h3>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3-Column Triage Kanban Board -->
+      <section aria-label="Patient Triage Columns" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- COLUMN 1: HIGH RISK -->
+        <div class="neo-flat flex flex-col h-[calc(100vh-310px)] min-h-[580px] p-2">
+          <div class="px-4 py-4 flex justify-between items-center">
+            <h2 class="text-lg font-extrabold text-red-500 flex items-center gap-2">
+              <i data-lucide="alert-circle" class="w-5 h-5"></i> High Risk
+            </h2>
+            <span id="count-high" class="neo-pressed text-red-500 text-sm font-extrabold px-4 py-1.5 rounded-full">0</span>
+          </div>
+          <div id="col-high" class="neo-pressed p-4 flex-1 overflow-y-auto custom-scrollbar mx-2 mb-2 rounded-2xl">
+            <!-- High Risk Patient Cards injected here -->
+          </div>
+        </div>
+
+        <!-- COLUMN 2: MEDIUM RISK -->
+        <div class="neo-flat flex flex-col h-[calc(100vh-310px)] min-h-[580px] p-2">
+          <div class="px-4 py-4 flex justify-between items-center">
+            <h2 class="text-lg font-extrabold text-orange-500 flex items-center gap-2">
+              <i data-lucide="activity" class="w-5 h-5"></i> Medium Risk
+            </h2>
+            <span id="count-medium" class="neo-pressed text-orange-500 text-sm font-extrabold px-4 py-1.5 rounded-full">0</span>
+          </div>
+          <div id="col-medium" class="neo-pressed p-4 flex-1 overflow-y-auto custom-scrollbar mx-2 mb-2 rounded-2xl">
+            <!-- Medium Risk Patient Cards injected here -->
+          </div>
+        </div>
+
+        <!-- COLUMN 3: LOW RISK -->
+        <div class="neo-flat flex flex-col h-[calc(100vh-310px)] min-h-[580px] p-2">
+          <div class="px-4 py-4 flex justify-between items-center">
+            <h2 class="text-lg font-extrabold text-blue-500 flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i> Low Risk
+            </h2>
+            <span id="count-low" class="neo-pressed text-blue-500 text-sm font-extrabold px-4 py-1.5 rounded-full">0</span>
+          </div>
+          <div id="col-low" class="neo-pressed p-4 flex-1 overflow-y-auto custom-scrollbar mx-2 mb-2 rounded-2xl">
+            <!-- Low Risk Patient Cards injected here -->
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL 1: Register New Patient -->
+  <div id="register-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="neo-flat bg-white/85 w-full max-w-md p-6 relative">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-xl font-extrabold text-gray-800 flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-pink-600"></i> Register EPAU Patient
+        </h3>
+        <button onclick="closeModal('register-modal')" class="neo-btn p-2 rounded-full text-gray-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="register-form" onsubmit="handleRegisterPatient(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Patient Full Name</label>
+          <input type="text" id="input-name" required placeholder="e.g., Noraini Binti Ismail"
+            class="neo-pressed w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-400" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Gestational Age (GA)</label>
+            <input type="text" id="input-ga" required placeholder="e.g., 8w 2d"
+              class="neo-pressed w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Triage Risk Level</label>
+            <select id="input-risk"
+              class="neo-pressed w-full px-3 py-3 rounded-xl text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-400">
+              <option value="High Risk">High Risk</option>
+              <option value="Medium Risk" selected>Medium Risk</option>
+              <option value="Low Risk">Low Risk</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Presenting Complaint</label>
+          <textarea id="input-complaint" rows="2" required placeholder="e.g., Moderate PV bleeding with lower abdominal cramping"
+            class="neo-pressed w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-400"></textarea>
+        </div>
+
+        <div class="pt-2 flex gap-3">
+          <button type="button" onclick="closeModal('register-modal')" class="neo-btn flex-1 py-3 rounded-xl text-sm font-bold text-gray-600">
+            Cancel
+          </button>
+          <button type="submit" class="neo-btn flex-1 py-3 rounded-xl text-sm font-extrabold text-pink-600">
+            Add to Queue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Clinical Triage Guide -->
+  <div id="guide-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="neo-flat bg-white/90 w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-extrabold text-gray-800 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-indigo-600"></i> EPAU Triage Prioritisation Guide
+        </h3>
+        <button onclick="closeModal('guide-modal')" class="neo-btn p-2 rounded-full text-gray-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div class="neo-pressed p-4 rounded-xl border-l-4 border-red-500">
+          <h4 class="font-extrabold text-red-600 mb-1">High Risk (Immediate MO Review)</h4>
+          <ul class="list-disc list-inside text-gray-700 space-y-1 text-xs font-medium">
+            <li>Heavy PV bleeding (soaking pads) or passage of products of conception</li>
+            <li>Hemodynamic instability (hypotension, tachycardia, syncope/dizziness)</li>
+            <li>Severe unilateral iliac fossa pain / suspected ruptured ectopic pregnancy</li>
+          </ul>
+        </div>
+
+        <div class="neo-pressed p-4 rounded-xl border-l-4 border-orange-400">
+          <h4 class="font-extrabold text-orange-600 mb-1">Medium Risk (Priority Review)</h4>
+          <ul class="list-disc list-inside text-gray-700 space-y-1 text-xs font-medium">
+            <li>Moderate PV bleeding with stable vital signs</li>
+            <li>Hyperemesis Gravidarum requiring IV hydration / antiemetics</li>
+            <li>Mild-to-moderate cramping with spotting in early pregnancy</li>
+          </ul>
+        </div>
+
+        <div class="neo-pressed p-4 rounded-xl border-l-4 border-blue-500">
+          <h4 class="font-extrabold text-blue-600 mb-1">Low Risk (Standard Queue)</h4>
+          <ul class="list-disc list-inside text-gray-700 space-y-1 text-xs font-medium">
+            <li>Minimal brown discharge or mild spotting without pain</li>
+            <li>Routine viability / dating ultrasound referral</li>
+            <li>Follow-up review for stable missed miscarriage / serial &beta;-hCG</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <button onclick="closeModal('guide-modal')" class="neo-btn w-full py-3 rounded-xl text-sm font-bold text-indigo-600">
+          Close Guide
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Banner (Replaces browser alerts) -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="neo-flat bg-white/90 px-5 py-3.5 rounded-2xl flex items-center gap-3 shadow-lg">
+      <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+      <span id="toast-message" class="text-sm font-bold text-gray-800">Status updated</span>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    // --- Constants ---
+    const RISK = {
+      HIGH: 'High Risk',
+      MEDIUM: 'Medium Risk',
+      LOW: 'Low Risk'
+    };
+
+    const STATUS = {
+      NOT_SEEN: 'Not Seen',
+      SEEN: 'Seen',
+      WARD: 'Sent to Ward'
+    };
+
+    const STORAGE_KEY = 'epau_kajang_patients_v1';
+
+    // --- Helper Functions ---
+    function formatTime(dateInput) {
+      if (!dateInput) return '-';
+      const d = new Date(dateInput);
+      return d.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function calculateWaitTime(regDate, endDate) {
+      const end = endDate ? new Date(endDate) : new Date();
+      const diffMs = Math.max(0, end - new Date(regDate));
+      const diffMins = Math.floor(diffMs / 60000);
+      
+      if (diffMins < 60) return `${diffMins} mins`;
+      const hrs = Math.floor(diffMins / 60);
+      const mins = diffMins % 60;
+      return `${hrs} hrs ${mins} mins`;
+    }
+
+    // --- Generate 10 Realistic Dummy Patients ---
+    function generateDummyPatients() {
+      const now = Date.now();
+      const pastTime = (mins) => new Date(now - mins * 60000).toISOString();
+      
+      return [
+        {
+          id: 'P001', name: 'Nurul Aminah Binti Hassan', gestationalAge: '7w 2d',
+          presentingComplaint: 'Heavy PV Bleeding, dizzy', triageRisk: RISK.HIGH,
+          status: STATUS.NOT_SEEN, registrationTime: pastTime(45), sentToWardTime: null
+        },
+        {
+          id: 'P002', name: 'Siti Sarah Othman', gestationalAge: '6w 0d',
+          presentingComplaint: 'Severe left iliac fossa pain', triageRisk: RISK.HIGH,
+          status: STATUS.SEEN, registrationTime: pastTime(130), sentToWardTime: null
+        },
+        {
+          id: 'P003', name: 'Michelle Lee', gestationalAge: '8w 5d',
+          presentingComplaint: 'Suspected Ectopic, hypotensive', triageRisk: RISK.HIGH,
+          status: STATUS.WARD, registrationTime: pastTime(200), sentToWardTime: pastTime(30)
+        },
+        {
+          id: 'P004', name: 'Fatima Zahra', gestationalAge: '9w 1d',
+          presentingComplaint: 'Moderate PV bleeding, stable vitals', triageRisk: RISK.MEDIUM,
+          status: STATUS.NOT_SEEN, registrationTime: pastTime(90), sentToWardTime: null
+        },
+        {
+          id: 'P005', name: 'Priya Sharma', gestationalAge: '10w 0d',
+          presentingComplaint: 'Severe Hyperemesis Gravidarum', triageRisk: RISK.MEDIUM,
+          status: STATUS.SEEN, registrationTime: pastTime(160), sentToWardTime: null
+        },
+        {
+          id: 'P006', name: 'Aisyah Maisarah', gestationalAge: '5w 4d',
+          presentingComplaint: 'Cramping and spotting', triageRisk: RISK.MEDIUM,
+          status: STATUS.NOT_SEEN, registrationTime: pastTime(25), sentToWardTime: null
+        },
+        {
+          id: 'P007', name: 'Grace Tan', gestationalAge: '11w 2d',
+          presentingComplaint: 'Brown discharge for 3 days', triageRisk: RISK.LOW,
+          status: STATUS.NOT_SEEN, registrationTime: pastTime(180), sentToWardTime: null
+        },
+        {
+          id: 'P008', name: 'Norhayati Ahmad', gestationalAge: '8w 0d',
+          presentingComplaint: 'Routine viability scan referral', triageRisk: RISK.LOW,
+          status: STATUS.SEEN, registrationTime: pastTime(210), sentToWardTime: null
+        },
+        {
+          id: 'P009', name: 'Kavitha Murugan', gestationalAge: '6w 5d',
+          presentingComplaint: 'Mild lower backache', triageRisk: RISK.LOW,
+          status: STATUS.NOT_SEEN, registrationTime: pastTime(65), sentToWardTime: null
+        },
+        {
+          id: 'P010', name: 'Amanda Smith', gestationalAge: '7w 5d',
+          presentingComplaint: 'Missed miscarriage review', triageRisk: RISK.LOW,
+          status: STATUS.WARD, registrationTime: pastTime(300), sentToWardTime: pastTime(120)
+        }
+      ];
+    }
+
+    // --- State Management ---
+    let patients = [];
+
+    function loadPatients() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            patients = parsed;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('LocalStorage unavailable, using in-memory demo state:', err);
+      }
+      patients = generateDummyPatients();
+      savePatients();
+    }
+
+    function savePatients() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(patients));
+      } catch (err) {
+        console.warn('Could not persist to LocalStorage:', err);
+      }
+    }
+
+    // --- Actions ---
+    function updatePatientStatus(id, newStatus) {
+      patients = patients.map(p => {
+        if (p.id === id) {
+          const updated = { ...p, status: newStatus };
+          if (newStatus === STATUS.WARD) {
+            updated.sentToWardTime = new Date().toISOString();
+          } else {
+            updated.sentToWardTime = null;
+          }
+          return updated;
+        }
+        return p;
+      });
+      savePatients();
+      renderDashboard();
+      showToast(`Patient status updated to "${newStatus}"`);
+    }
+
+    function handleRegisterPatient(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('input-name');
+      const gaInput = document.getElementById('input-ga');
+      const riskInput = document.getElementById('input-risk');
+      const complaintInput = document.getElementById('input-complaint');
+
+      const newPatient = {
+        id: 'P' + String(Date.now()).slice(-4),
+        name: nameInput.value.trim(),
+        gestationalAge: gaInput.value.trim(),
+        triageRisk: riskInput.value,
+        presentingComplaint: complaintInput.value.trim(),
+        status: STATUS.NOT_SEEN,
+        registrationTime: new Date().toISOString(),
+        sentToWardTime: null
+      };
+
+      patients.push(newPatient);
+      savePatients();
+      renderDashboard();
+      
+      // Reset & Close Modal
+      event.target.reset();
+      closeModal('register-modal');
+      showToast(`Registered ${newPatient.name} (${newPatient.triageRisk})`);
+    }
+
+    function resetDemoData() {
+      patients = generateDummyPatients();
+      savePatients();
+      renderDashboard();
+      showToast('Demo data restored (10 patients)');
+    }
+
+    // --- UI Helpers (Modals & Toasts) ---
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      if (!toast || !toastMsg) return;
+
+      toastMsg.textContent = message;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    // --- Escape HTML to prevent XSS ---
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // --- Render Patient Card HTML ---
+    function createPatientCardHTML(patient) {
+      const riskIndicator = {
+        [RISK.HIGH]: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.85)]',
+        [RISK.MEDIUM]: 'bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.85)]',
+        [RISK.LOW]: 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.85)]'
+      }[patient.triageRisk];
+
+      const statusColor = {
+        [STATUS.NOT_SEEN]: 'text-red-500',
+        [STATUS.SEEN]: 'text-green-600',
+        [STATUS.WARD]: 'text-purple-600'
+      }[patient.status];
+
+      const waitTime = calculateWaitTime(patient.registrationTime, patient.sentToWardTime);
+
+      let actionHTML = '';
+      if (patient.status === STATUS.NOT_SEEN) {
+        actionHTML = `
+          <button onclick="updatePatientStatus('${patient.id}', '${STATUS.SEEN}')"
+            class="neo-btn flex items-center gap-2 text-sm font-bold text-blue-600 px-4 py-3 rounded-xl w-full justify-center">
+            Mark as Seen <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>`;
+      } else if (patient.status === STATUS.SEEN) {
+        actionHTML = `
+          <div class="flex gap-2">
+            <button onclick="updatePatientStatus('${patient.id}', '${STATUS.NOT_SEEN}')" title="Revert to Not Seen"
+              class="neo-btn px-3 py-3 rounded-xl text-gray-500 hover:text-gray-700 flex items-center justify-center">
+              <i data-lucide="undo-2" class="w-4 h-4"></i>
+            </button>
+            <button onclick="updatePatientStatus('${patient.id}', '${STATUS.WARD}')"
+              class="neo-btn flex-1 flex items-center gap-2 text-sm font-bold text-purple-600 px-4 py-3 rounded-xl justify-center">
+              Send to Ward <i data-lucide="bed-double" class="w-4 h-4"></i>
+            </button>
+          </div>`;
+      } else if (patient.status === STATUS.WARD) {
+        actionHTML = `
+          <div class="flex gap-2 items-center">
+            <button onclick="updatePatientStatus('${patient.id}', '${STATUS.SEEN}')" title="Revert to Seen"
+              class="neo-btn px-3 py-3 rounded-xl text-gray-500 hover:text-gray-700 flex items-center justify-center">
+              <i data-lucide="undo-2" class="w-4 h-4"></i>
+            </button>
+            <div class="neo-pressed flex-1 text-sm font-bold text-purple-600 text-center py-3 rounded-xl flex items-center justify-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> Admission Completed
+            </div>
+          </div>`;
+      }
+
+      const wardTimeHTML = patient.status === STATUS.WARD ? `
+        <div class="col-span-2 pt-2 border-t border-gray-300/40">
+          <span class="block text-gray-400 font-bold mb-0.5">Sent to Ward</span>
+          <span class="font-bold text-purple-600 flex items-center gap-1">
+            <i data-lucide="bed-double" class="w-3.5 h-3.5"></i> ${formatTime(patient.sentToWardTime)}
+          </span>
+        </div>` : '';
+
+      return `
+        <article class="neo-flat p-5 mb-5 flex flex-col transition-all">
+          <!-- Header: Risk Dot & Patient Name -->
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-3 h-3 rounded-full flex-shrink-0 ${riskIndicator}"></div>
+            <h4 class="font-bold text-gray-700 text-base leading-tight">${escapeHTML(patient.name)}</h4>
+          </div>
+
+          <!-- Badges: GA & Triage Status -->
+          <div class="flex flex-wrap gap-2.5 mb-4">
+            <span class="neo-pressed px-3 py-1.5 text-xs font-bold text-gray-600 rounded-full">
+              GA: ${escapeHTML(patient.gestationalAge)}
+            </span>
+            <span class="neo-pressed px-3 py-1.5 text-xs font-extrabold rounded-full ${statusColor}">
+              ${escapeHTML(patient.status)}
+            </span>
+          </div>
+
+          <!-- Presenting Complaint -->
+          <div class="mb-4">
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Presenting Complaint</p>
+            <p class="text-sm text-gray-700 font-medium">${escapeHTML(patient.presentingComplaint)}</p>
+          </div>
+
+          <!-- Timings Box -->
+          <div class="neo-pressed p-3 rounded-xl grid grid-cols-2 gap-3 mb-5 text-xs text-gray-600">
+            <div>
+              <span class="block text-gray-400 font-bold mb-0.5">Registered</span>
+              <span class="font-bold text-gray-700 flex items-center gap-1">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${formatTime(patient.registrationTime)}
+              </span>
+            </div>
+            <div>
+              <span class="block text-gray-400 font-bold mb-0.5">Wait Time</span>
+              <span class="font-bold text-gray-700 block">${waitTime}</span>
+            </div>
+            ${wardTimeHTML}
+          </div>
+
+          <!-- Action Controls -->
+          <div class="mt-auto">
+            ${actionHTML}
+          </div>
+        </article>
+      `;
+    }
+
+    // --- Render Full Dashboard ---
+    function renderDashboard() {
+      // Update Top Metrics
+      document.getElementById('metric-total').textContent = patients.length;
+      document.getElementById('metric-not-seen').textContent = patients.filter(p => p.status === STATUS.NOT_SEEN).length;
+      document.getElementById('metric-seen').textContent = patients.filter(p => p.status === STATUS.SEEN).length;
+      document.getElementById('metric-ward').textContent = patients.filter(p => p.status === STATUS.WARD).length;
+
+      // Filter & Sort by earliest registration time first
+      const sortByReg = (a, b) => new Date(a.registrationTime) - new Date(b.registrationTime);
+      const highRisk = patients.filter(p => p.triageRisk === RISK.HIGH).sort(sortByReg);
+      const mediumRisk = patients.filter(p => p.triageRisk === RISK.MEDIUM).sort(sortByReg);
+      const lowRisk = patients.filter(p => p.triageRisk === RISK.LOW).sort(sortByReg);
+
+      // Update Column Counts
+      document.getElementById('count-high').textContent = highRisk.length;
+      document.getElementById('count-medium').textContent = mediumRisk.length;
+      document.getElementById('count-low').textContent = lowRisk.length;
+
+      // Render Columns
+      const emptyHTML = `<div class="text-center py-12 text-xs font-bold text-gray-400 uppercase tracking-wider">No patients in this category</div>`;
+      
+      document.getElementById('col-high').innerHTML = highRisk.length ? highRisk.map(createPatientCardHTML).join('') : emptyHTML;
+      document.getElementById('col-medium').innerHTML = mediumRisk.length ? mediumRisk.map(createPatientCardHTML).join('') : emptyHTML;
+      document.getElementById('col-low').innerHTML = lowRisk.length ? lowRisk.map(createPatientCardHTML).join('') : emptyHTML;
+
+      // Re-initialize Lucide SVG icons safely
+      try {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      } catch (err) {
+        console.warn('Lucide icon refresh warning:', err);
+      }
+    }
+
+    // --- Initialize App on Load ---
+    window.addEventListener('DOMContentLoaded', () => {
+      // Set Shift Overview Date in Malaysian format
+      const shiftDateEl = document.getElementById('shift-date');
+      if (shiftDateEl) {
+        shiftDateEl.textContent = new Date().toLocaleDateString('en-MY', {
+          weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+        });
+      }
+
+      loadPatients();
+      renderDashboard();
+
+      // Refresh live waiting times every 60 seconds
+      setInterval(() => {
+        renderDashboard();
+      }, 60000);
+    });
+  </script>
+</body>
+</html>
